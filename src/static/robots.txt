@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fivetownsgaragedoor.com/sitemap.xml

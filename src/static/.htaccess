@@ -1,0 +1,71 @@
+# ==========================================================================
+# Five Towns Garage Door — Apache / LiteSpeed / cPanel configuration
+# Legacy .html URLs are served as-is (exact filenames, case-sensitive).
+# Every redirect below goes to its FINAL https://fivetownsgaragedoor.com URL
+# in a single 301 hop — no chains, no loops.
+# ==========================================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# 1. Retired legacy URLs (checked first so http://www. requests still take one hop)
+RewriteRule ^contact\.php$ https://fivetownsgaragedoor.com/contact.html [R=301,L]
+RewriteRule ^error\.html$ https://fivetownsgaragedoor.com/index.html [R=301,L]
+
+# 2. Force canonical host: www -> non-www (also upgrades to HTTPS in the same hop)
+RewriteCond %{HTTP_HOST} ^www\.fivetownsgaragedoor\.com$ [NC]
+RewriteRule ^ https://fivetownsgaragedoor.com%{REQUEST_URI} [R=301,L,NE]
+
+# 3. Force HTTPS (proxy/CDN aware: honours X-Forwarded-Proto to avoid loops)
+RewriteCond %{HTTP_HOST} ^fivetownsgaragedoor\.com$ [NC]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://fivetownsgaragedoor.com%{REQUEST_URI} [R=301,L,NE]
+
+# NOTE: "/" and "/index.html" are both served directly (200). Never redirect
+# one to the other. The canonical tag on the homepage handles consolidation.
+</IfModule>
+
+# --- Security headers ---
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # Enable HSTS only after HTTPS is confirmed working on the live domain:
+  # Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+
+# --- Compression ---
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml application/xml text/xml text/plain
+</IfModule>
+
+# --- Caching: HTML revalidates; versioned CSS/JS and images cache long ---
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/xml "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/avif "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 month"
+</IfModule>
+
+AddType image/svg+xml .svg
+AddType image/avif .avif
+AddType image/webp .webp
+AddDefaultCharset UTF-8
+AddType font/woff2 .woff2
+<IfModule mod_expires.c>
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

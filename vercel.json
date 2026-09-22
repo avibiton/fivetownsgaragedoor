@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "site",
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/contact.php", "destination": "https://fivetownsgaragedoor.com/contact.html", "statusCode": 301 },
+    { "source": "/error.html", "destination": "https://fivetownsgaragedoor.com/index.html", "statusCode": 301 },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "www.fivetownsgaragedoor.com" }], "destination": "https://fivetownsgaragedoor.com/:path*", "statusCode": 301 }
+  ],
+  "headers": [
+    { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+      { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+    ] }
+  ]
+}

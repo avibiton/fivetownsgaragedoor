@@ -1,0 +1,10 @@
+# 301 Redirects & Canonical Rules for Five Towns Garage Door
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 301 Redirects for Legacy URLs
+Redirect 301 /contact.php /contact.html
+Redirect 301 /error.html /index.html

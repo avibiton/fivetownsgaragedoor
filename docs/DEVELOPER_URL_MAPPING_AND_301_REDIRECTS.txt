@@ -1,0 +1,77 @@
+================================================================================
+FIVE TOWNS GARAGE DOOR — LEGACY URL PRESERVATION & REDIRECT INSTRUCTIONS
+================================================================================
+Target Domain: https://fivetownsgaragedoor.com
+Goal: Retain 100% of historical SEO authority, Google index history, and backlinks from 2013-2022.
+
+--------------------------------------------------------------------------------
+1. EXACT 1-TO-1 MATCHING TABLE (OLD URL -> NEW PRODUCTION FILE)
+--------------------------------------------------------------------------------
+Every legacy URL below is already mapped to an exact, high-authority file in the new site.
+Because the filenames match the legacy URLs EXACTLY, Google will NOT lose rankings, and all existing links will load seamlessly without broken 404 errors!
+
+LEGACY URL (Since 2013-2015)                   -> NEW PRODUCTION FILE
+--------------------------------------------------------------------------------
+/cedarhurst-garage-door.html                   -> /cedarhurst-garage-door.html
+/commercial.html                               -> /commercial.html
+/contact.html                                  -> /contact.html
+/faq.html                                      -> /faq.html
+/Genieopeners.html                             -> /Genieopeners.html
+/hewlett-garage-door.html                      -> /hewlett-garage-door.html
+/index.html (or root /)                        -> /index.html
+/installation.html                             -> /installation.html
+/inwood-garage-door.html                       -> /inwood-garage-door.html
+/lawrence-garage-door.html                     -> /lawrence-garage-door.html
+/liftmasteropeners.html                        -> /liftmasteropeners.html
+/LocationServices.html                         -> /LocationServices.html
+/openers.html                                  -> /openers.html
+/repair.html                                   -> /repair.html
+/residential.html                              -> /residential.html
+/woodmere-garage-door.html                     -> /woodmere-garage-door.html
+
+--------------------------------------------------------------------------------
+2. 301 REDIRECTS FOR RETIRED / SPECIAL URLS
+--------------------------------------------------------------------------------
+For older server scripts and error pages, configure permanent 301 redirects:
+
+Old URL:        /contact.php
+Redirect To:    /contact.html (301 Permanent Redirect)
+
+Old URL:        /error.html
+Redirect To:    /index.html   (301 Permanent Redirect)
+
+Old URL:        http://www.fivetownsgaragedoor.com  (or http://)
+Redirect To:    https://fivetownsgaragedoor.com     (Force HTTPS + Canonical non-www)
+
+--------------------------------------------------------------------------------
+3. SERVER CONFIGURATION EXAMPLES
+--------------------------------------------------------------------------------
+
+[Option A: Apache / LiteSpeed (.htaccess)]
+RewriteEngine On
+
+# 1. Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Redirect contact.php to contact.html
+Redirect 301 /contact.php /contact.html
+Redirect 301 /error.html /index.html
+
+[Option B: Cloudflare / Netlify (_redirects file)]
+/contact.php    /contact.html    301!
+/error.html     /index.html      301!
+http://*        https://:splat   301!
+
+[Option C: NGINX]
+location = /contact.php {
+    return 301 https://fivetownsgaragedoor.com/contact.html;
+}
+location = /error.html {
+    return 301 https://fivetownsgaragedoor.com/index.html;
+}
+
+================================================================================
+SUMMARY:
+You do NOT need to rebuild the site's URL structure. The new production files preserve the exact file names that have been indexed by Google since 2013. Upload the files directly into the web root (public_html), apply the two 301 redirects above, and historical SEO equity will be fully preserved!
+================================================================================
