@@ -1,6 +1,6 @@
 # Five Towns Garage Door — fivetownsgaragedoor.com
 
-Production website for Five Towns Garage Door (579 Central Avenue, Cedarhurst, NY 11516 · (516) 490-0931).
+Production website for Five Towns Garage Door (578 Central Avenue, Cedarhurst, NY 11516 · (516) 490-0931).
 
 **Deploy the contents of [`site/`](site/). It is plain static HTML/CSS/JS: no server-side code, and no Node or Python needed in production.**
 
@@ -76,6 +76,19 @@ The site runs without any framework. It loads one minified CSS file (about 36 KB
 
 Lighthouse (mobile, local) scored 100 for Performance, Accessibility, Best Practices and SEO on all 16 pages, with CLS 0.
 
-## Photography
+## Hero photography
 
-The legacy site had no photos, and none were supplied, so none were invented. If real job photos become available, add optimized WebP/AVIF files under `site/assets/images/` via `src/static/assets/images/`, with explicit `width`/`height`, descriptive `alt` text, and `loading="lazy"` below the fold.
+Every page hero has a full-bleed garage-door photo behind a dark overlay. Each is a responsive `<picture>` in AVIF and WebP at 768/1280/1920 px, with explicit dimensions and a high-priority preload. The photos are **licensed Unsplash stock, not company jobs**; credits are in `docs/PHOTO-CREDITS.md`. To use real job photos, replace the files in `src/static/assets/images/hero/` (same names), or change the keys in `content_data.py`, then run `python3 build.py`.
+
+## Google reviews
+
+The reviews come from the Google Business Profile "Five Towns Garage Doors": https://maps.google.com/?cid=13986575148892573272
+
+- The rating (4.7 from 15 reviews, as of Sept 2026) appears in the top bar, the footer and each reviews section.
+- The homepage shows all 14 five-star reviews, verbatim. Every other page shows 3 of them just before the final call-to-action.
+- The data lives in `content_data.py` (`GOOGLE_RATING`, `GOOGLE_COUNT`, `GOOGLE_AS_OF`, `REVIEWS`). **Update it when the profile changes**, because the hard-coded count goes stale.
+- The site deliberately has no Review or AggregateRating structured data. Google ignores review markup a business adds about itself on its own site, and it can trigger a manual action.
+
+## Owner action: NAP consistency
+
+The website and structured data now use **578 Central Avenue**, matching the Google Business Profile. But the profile lists hours as "Closes 7 PM", while the site advertises 24/7 service. Make the Google hours match the real service hours; mismatched hours hurt local rankings.

@@ -29,6 +29,9 @@ import shutil
 import sys
 from pathlib import Path
 
+from content_data import (GOOGLE_COUNT, GOOGLE_RATING, GOOGLE_URL, HERO_BY_PAGE, hero_picture,
+                          hero_srcset, render_reviews)
+
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
 PAGES = SRC / "pages"
@@ -41,7 +44,7 @@ BUILD_DATE = datetime.date.today().isoformat()
 
 BUSINESS = {
     "name": "Five Towns Garage Door",
-    "street": "579 Central Avenue",
+    "street": "578 Central Avenue",
     "city": "Cedarhurst",
     "region": "NY",
     "zip": "11516",
@@ -185,6 +188,7 @@ def render_header(page):
   <div class="wrap">
     <span class="dispatch-bar__item"><span class="live" aria-hidden="true"></span>24/7 Direct Local Dispatch</span>
     <span class="dispatch-bar__item dispatch-bar__item--hide-sm">{icon("pin")}Cedarhurst · Hewlett · Lawrence · Woodmere · Inwood</span>
+    <a class="dispatch-bar__item dispatch-bar__rating" href="{GOOGLE_URL}" target="_blank" rel="noopener" data-cta="topbar-reviews"><span class="stars" aria-hidden="true">★★★★★</span>{GOOGLE_RATING} on Google ({GOOGLE_COUNT})</a>
     <span class="dispatch-bar__item">Call <a href="tel:{PHONES["main"]["tel"]}" class="js-call" data-cta="topbar-call">{PHONES["main"]["display"]}</a></span>
   </div>
 </div>
@@ -223,6 +227,7 @@ def render_footer(page):
         <a href="mailto:{BUSINESS["email"]}">{icon("mail")}{BUSINESS["email"]}</a>
         <span>{BUSINESS["street"]}, {BUSINESS["city"]}, {BUSINESS["region"]} {BUSINESS["zip"]}</span>
         <span>Monday – Sunday: 24 Hours</span>
+        <a href="{GOOGLE_URL}" target="_blank" rel="noopener" data-cta="footer-reviews">★ {GOOGLE_RATING} on Google · {GOOGLE_COUNT} reviews</a>
       </address>
     </div>
     <div>
@@ -292,6 +297,7 @@ def business_entity():
         "currenciesAccepted": "USD",
         "paymentAccepted": "Cash, Credit Card, Check",
         "openingHours": "Mo-Su 00:00-23:59",
+        "hasMap": GOOGLE_URL,
         "openingHoursSpecification": {
             "@type": "OpeningHoursSpecification",
             "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -306,7 +312,7 @@ def business_entity():
             "postalCode": BUSINESS["zip"],
             "addressCountry": "US",
         },
-        "geo": {"@type": "GeoCoordinates", "latitude": 40.6234, "longitude": -73.7296},
+        "geo": {"@type": "GeoCoordinates", "latitude": 40.623234, "longitude": -73.722048},
         "contactPoint": [
             {"@type": "ContactPoint", "telephone": "+1-516-490-0931", "contactType": "customer service",
              "name": "Main Line — 24/7 Dispatch & Emergency Service", "areaServed": "US-NY", "availableLanguage": "English"},
@@ -440,7 +446,20 @@ def esc(s):
 
 
 def render_page(page, content, css_href, js_href):
-    used = set(ICON_RE.findall(content)) | {"phone", "pin", "chevron", "menu", "close", "mail", "clipboard"}
+    # Google reviews: explicit {{reviews}} placeholder, else just before the final CTA band.
+    if "{{reviews}}" in content:
+        content = content.replace("{{reviews}}", render_reviews(page["file"], page.get("_idx", 0)))
+    elif not page.get("noindex") and '<section class="cta-band"' in content:
+        content = content.replace('<section class="cta-band"', render_reviews(page["file"], page.get("_idx", 0)) + '<section class="cta-band"', 1)
+    # Hero photo: injected as the first child of the page's hero section.
+    key = page.get("hero_image", HERO_BY_PAGE.get(page["file"]))
+    preload = ""
+    if key:
+        content, n = re.subn(r'(<section class="(?:page-hero|hero)\b[^"]*"[^>]*>)', lambda m: m.group(1) + hero_picture(key), content, count=1)
+        if n:
+            preload = (f'<link rel="preload" as="image" type="image/avif" imagesrcset="{hero_srcset(key, 'avif')}" '
+                       'imagesizes="100vw" fetchpriority="high">')
+    used = set(ICON_RE.findall(content)) | {"phone", "pin", "chevron", "menu", "close", "mail", "clipboard", "arrow"}
     content = ICON_RE.sub(lambda m: icon(m.group(1)), content)
     if "{{breadcrumbs}}" in content:
         content = content.replace("{{breadcrumbs}}", render_breadcrumbs(page.get("breadcrumbs", [])))
@@ -487,6 +506,7 @@ def render_page(page, content, css_href, js_href):
 <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+{preload}
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{css_href}">
@@ -506,6 +526,7 @@ def render_page(page, content, css_href, js_href):
     if page.get("noindex"):
         # Error pages can be served at any depth: make local URLs root-absolute.
         head = re.sub(r'((?:href|src)=")(?!https?:|tel:|mailto:|#|/)', r"\1/", head)
+        head = re.sub(r'(?<=[\s",])assets/', "/assets/", head)
     return head
 
 
@@ -526,6 +547,7 @@ def load_pages():
         for req in ("title", "description"):
             if req not in meta:
                 sys.exit(f"{path.name}: META missing '{req}'")
+        meta["_idx"] = len(pages)
         pages.append((meta, raw[m.end():]))
     return pages
 
