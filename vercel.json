@@ -9,6 +9,8 @@
   "redirects": [
     { "source": "/contact.php", "destination": "https://fivetownsgaragedoor.com/contact.html", "statusCode": 301 },
     { "source": "/error.html", "destination": "https://fivetownsgaragedoor.com/index.html", "statusCode": 301 },
+    { "source": "/up.link", "destination": "https://fivetownsgaragedoor.com/index.html", "statusCode": 301 },
+    { "source": "/\\)", "destination": "https://fivetownsgaragedoor.com/index.html", "statusCode": 301 },
     { "source": "/:path*", "has": [{ "type": "host", "value": "www.fivetownsgaragedoor.com" }], "destination": "https://fivetownsgaragedoor.com/:path*", "statusCode": 301 }
   ],
   "headers": [

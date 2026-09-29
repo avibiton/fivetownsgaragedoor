@@ -36,6 +36,8 @@ check "http /contact.php"             $D http  /contact.php 301 "$F/contact.html
 check "http www /contact.php"         $W http  /contact.php 301 "$F/contact.html"
 check "https /error.html"             $D https /error.html  301 "$F/index.html"
 check "http www /error.html"          $W http  /error.html  301 "$F/index.html"
+check "https /up.link"                 $D https /up.link     301 "$F/index.html"
+check "https /)"                       $D https "/)"         301 "$F/index.html"
 # Protocol / host normalization preserves the path (single hop)
 check "http root"                     $D http  /            301 "$F/"
 check "http /repair.html"             $D http  /repair.html 301 "$F/repair.html"
