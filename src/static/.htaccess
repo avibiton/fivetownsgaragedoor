@@ -15,6 +15,9 @@ RewriteEngine On
 # 1. Retired legacy URLs (checked first so http://www. requests still take one hop)
 RewriteRule ^contact\.php$ https://fivetownsgaragedoor.com/contact.html [R=301,L]
 RewriteRule ^error\.html$ https://fivetownsgaragedoor.com/index.html [R=301,L]
+# Other legacy URLs found in the Wayback Machine (no matching page -> homepage canonical)
+RewriteRule ^up\.link$ https://fivetownsgaragedoor.com/index.html [R=301,L]
+RewriteRule ^\)$ https://fivetownsgaragedoor.com/index.html [R=301,L]
 
 # 2. Force canonical host: www -> non-www (also upgrades to HTTPS in the same hop)
 RewriteCond %{HTTP_HOST} ^www\.fivetownsgaragedoor\.com$ [NC]

@@ -4,6 +4,9 @@
 # Legacy URLs go straight to their final HTTPS non-www destination (single hop, no chains).
 /contact.php    https://fivetownsgaragedoor.com/contact.html    301!
 /error.html     https://fivetownsgaragedoor.com/index.html      301!
+# Other legacy URLs found in the Wayback Machine (no matching page -> homepage canonical)
+/up.link        https://fivetownsgaragedoor.com/index.html      301!
+/)              https://fivetownsgaragedoor.com/index.html      301!
 
 # Canonical host: HTTPS + non-www, path preserved.
 # (Netlify also enforces HTTPS automatically once the certificate is provisioned.)
