@@ -528,3 +528,6 @@ a.card:hover::before,.card--link:hover::before,.card--accent::before{transform:s
 .review-card blockquote p{color:var(--gray-dark);font-size:16px;line-height:1.65}
 .review-card figcaption{margin-top:14px;font-family:var(--ff-head);font-weight:600;font-size:17px;letter-spacing:.02em}
 @media (max-width:900px){.review-grid{grid-template-columns:minmax(0,1fr)}}
+/* A single remaining phone line (e.g. while other lines are suspended) spans the row */
+.grid-3>.line-card:only-child{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 24px}
+.grid-3>.line-card:only-child .line-card__num{margin-top:0;font-size:clamp(28px,4vw,40px)}

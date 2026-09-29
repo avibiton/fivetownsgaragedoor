@@ -29,6 +29,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import phone_suspension
 from content_data import (GOOGLE_COUNT, GOOGLE_RATING, GOOGLE_URL, HERO_BY_PAGE, hero_picture,
                           hero_srcset, render_reviews)
 
@@ -199,7 +200,7 @@ def render_header(page):
       <ul class="nav__list">{render_nav(page["file"], page.get("nav"))}</ul>
       <div class="nav-mobile-cta">
         <a class="btn btn--primary btn--block js-call" href="tel:{ph["tel"]}" data-cta="menu-call">{icon("phone")}Call {ph["display"]}</a>
-        <a class="btn btn--outline btn--block" href="contact.html">All Phone Lines &amp; Contact</a>
+        <a class="btn btn--outline btn--block" href="contact.html">{"Contact &amp; Dispatch" if phone_suspension.active() else "All Phone Lines &amp; Contact"}</a>
         <p>Open 24 hours · 7 days · Holidays included</p>
       </div>
     </nav>
@@ -214,6 +215,11 @@ def render_header(page):
 def render_footer(page):
     town_links = "".join(f'<li><a href="{f}">{t} NY {z}</a></li>' for t, z, f, _ in TOWNS)
     m, s, n = PHONES["main"], PHONES["south"], PHONES["north"]
+    footer_extra_lines = "\n        ".join(
+        f'<a class="js-call" href="tel:{ln["tel"]}" data-cta="footer-call-{key}">{label}: {ln["display"]}</a>'
+        for key, ln, label in (("south", s, "South Shore"), ("north", n, "North Shore"))
+        if key not in phone_suspension.SUSPENDED_LINES
+    )
     ph = PHONES[page["phone"]]
     return f'''<footer class="site-footer">
   <div class="wrap site-footer__top">
@@ -222,8 +228,7 @@ def render_footer(page):
       <p class="site-footer__about">Dedicated garage door repair and installation throughout Cedarhurst, Hewlett, Lawrence, Woodmere, and Inwood, Nassau County NY.</p>
       <address class="footer-nap">
         <a class="footer-nap__main js-call" href="tel:{m["tel"]}" data-cta="footer-call">{icon("phone")}{m["display"]}</a>
-        <a class="js-call" href="tel:{s["tel"]}" data-cta="footer-call-south">South Shore: {s["display"]}</a>
-        <a class="js-call" href="tel:{n["tel"]}" data-cta="footer-call-north">North Shore: {n["display"]}</a>
+        {footer_extra_lines}
         <a href="mailto:{BUSINESS["email"]}">{icon("mail")}{BUSINESS["email"]}</a>
         <span>{BUSINESS["street"]}, {BUSINESS["city"]}, {BUSINESS["region"]} {BUSINESS["zip"]}</span>
         <span>Monday – Sunday: 24 Hours</span>
@@ -320,7 +325,7 @@ def business_entity():
              "name": "South Shore Line", "areaServed": "US-NY", "availableLanguage": "English"},
             {"@type": "ContactPoint", "telephone": "+1-516-612-9316", "contactType": "customer service",
              "name": "North Shore Line", "areaServed": "US-NY", "availableLanguage": "English"},
-        ],
+        ][: 1 if phone_suspension.active() else 3],
         "areaServed": [
             {"@type": "City", "name": t, "postalCode": z, "sameAs": w} for t, z, _, w in TOWNS
         ],
@@ -548,7 +553,16 @@ def load_pages():
             if req not in meta:
                 sys.exit(f"{path.name}: META missing '{req}'")
         meta["_idx"] = len(pages)
-        pages.append((meta, raw[m.end():]))
+        content = raw[m.end():]
+        if phone_suspension.active():
+            # Temporary: hide suspended phone lines (see phone_suspension.py to restore).
+            if meta["phone"] in phone_suspension.SUSPENDED_LINES:
+                meta["phone"] = "main"
+            for k in ("title", "description", "og_title", "og_description"):
+                if k in meta:
+                    meta[k] = phone_suspension.suspend_text(meta[k])
+            content = phone_suspension.suspend_html(content)
+        pages.append((meta, content))
     return pages
 
 
@@ -636,6 +650,9 @@ def main():
     sitemap = []
     for meta, content in load_pages():
         out = render_page(meta, content, css_href, js_href)
+        left = phone_suspension.leftovers(out)
+        if left:
+            sys.exit(f"{meta['file']}: suspended phone numbers still present: {sorted(set(left))}")
         (OUT / meta["file"]).write_text(out, encoding="utf-8")
         if not meta.get("noindex"):
             sitemap.append((meta["canonical"], meta.get("priority", "0.8")))

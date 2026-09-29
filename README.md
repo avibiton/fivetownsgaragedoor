@@ -4,6 +4,9 @@ Production website for Five Towns Garage Door (578 Central Avenue, Cedarhurst, N
 
 **Deploy the contents of [`site/`](site/). It is plain static HTML/CSS/JS: no server-side code, and no Node or Python needed in production.**
 
+> **⚠ Temporary phone-line suspension (since 2026-09-29).** The South Shore (516) 612-9317 and North Shore (516) 612-9316 lines are not operational, so the built site shows **only (516) 490-0931**. The page sources still contain the original numbers; `phone_suspension.py` hides the two lines at build time. It covers titles, meta descriptions, dispatch cards, the footer, the contact page, town-page call buttons and structured data, and the build fails if either number leaks through.
+> **To restore the lines:** in `phone_suspension.py` set `SUSPENDED_LINES = set()`, then run `python3 build.py` and commit `site/`.
+
 ## Legacy URLs are preserved exactly
 
 Every URL indexed since 2013 is served at the same path, with the same filename and letter case:
